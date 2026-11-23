@@ -39,3 +39,26 @@ Docs: https://docs.expo.dev/eas/index.md
 - If `ios/` and `android/` directories do not exist, they are generated (Continuous Native Generation). Never create or edit them by hand — configure native behavior in `app.json` and config plugins.
 - Expo Go only includes its bundled native modules. After adding a library with native code, the app needs a development build: `npx expo run:ios|android` locally, or `eas build --profile development`.
 - Prefer recommended Expo modules over third-party libraries, and check your available skills before adding dependencies. Docs: https://docs.expo.dev/versions/latest/index.md
+## Project: dyslexia support app
+
+Three tools in tabs: Read, Write, Summarise. Code in `src/app`, shared code in
+`src/components`, `src/services`, `src/context`, `src/constants`.
+Must run in Expo Go on iOS. Use only Expo Go-compatible packages
+(expo-speech, async-storage, expo-font and similar).
+Backend: Python FastAPI in `server/`, separate from the app.
+
+### Working rules
+- Keep code simple and commented, readable for a second-year student.
+- Touch only the files needed for the task.
+- After each completed feature, make a git commit with a clear message. Do not push; I will push.
+- Never put API keys in committed code. Keep keys in a git-ignored file.
+- If something fails, explain the error in plain words before fixing it.
+
+### Dyslexia-friendly design (apply to every screen)
+- Font: Lexend (@expo-google-fonts/lexend), system font as fallback.
+- Minimum text size 18, line height about 1.6, extra letter spacing.
+- Left-aligned, short lines, no italics, no underlines, no ALL CAPS.
+- Background cream (#FBF6E9), text dark grey (#2B2B2B), high contrast.
+- Tap targets at least 48 px. Never use colour alone: add an icon or text label.
+- One main action per screen, generous spacing, clear friendly messages.
+Write app code in plain JavaScript (.js/.jsx), not TypeScript.

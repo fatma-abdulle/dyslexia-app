@@ -1,0 +1,10 @@
+// Large, labelled controls for reading display settings.
+import React from 'react';
+import { Text, View, Pressable } from 'react-native';
+import { useSettings } from '../context/SettingsContext';
+
+export default function SettingsPanel() {
+  const { settings, update, colors } = useSettings();
+  const row = (label, key, step, min, max, digits = 0) => <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginVertical: 5 }}><Text style={{ color: colors.text, fontSize: 18, fontFamily: 'Lexend_400Regular' }}>{label}: {settings[key].toFixed(digits)}</Text><View style={{ flexDirection: 'row' }}>{[-1, 1].map((direction) => <Pressable key={direction} accessibilityLabel={`${direction < 0 ? 'Decrease' : 'Increase'} ${label}`} accessibilityRole="button" onPress={() => update(key, Math.max(min, Math.min(max, Number((settings[key] + direction * step).toFixed(digits)))))} style={{ minWidth: 52, minHeight: 48, marginLeft: 8, borderRadius: 12, backgroundColor: colors.soft, alignItems: 'center', justifyContent: 'center' }}><Text style={{ color: colors.text, fontSize: 24 }}>{direction < 0 ? '−' : '+'}</Text></Pressable>)}</View></View>;
+  return <View style={{ paddingVertical: 8 }}>{row('Text size', 'fontSize', 2, 18, 32)}{row('Line spacing', 'lineSpacing', 0.1, 1.4, 2.2, 1)}{row('Letter spacing', 'letterSpacing', 0.5, 0, 3, 1)}<Text style={{ color: colors.text, fontSize: 18, marginTop: 12, marginBottom: 6 }}>Page colour</Text><View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>{[['cream', 'Cream'], ['blue', 'Blue'], ['dark', 'Dark']].map(([value, label]) => <Pressable key={value} accessibilityLabel={`${label} theme`} accessibilityRole="button" onPress={() => update('theme', value)} style={{ minWidth: 80, minHeight: 48, justifyContent: 'center', alignItems: 'center', backgroundColor: settings.theme === value ? colors.accent : colors.soft, borderRadius: 12, marginRight: 8, marginBottom: 8 }}><Text style={{ color: settings.theme === value ? colors.background : colors.text, fontSize: 18 }}>{label}</Text></Pressable>)}</View></View>;
+}

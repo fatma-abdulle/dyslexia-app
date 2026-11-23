@@ -16,12 +16,12 @@ Use `bunx` instead of `npx` if the project uses bun (`bun.lock` present).
 npx expo install <package>  # ALWAYS use instead of npm/yarn/pnpm/bun add — resolves SDK-compatible versions
 npx expo start              # start the dev server
 npx expo lint               # lint
-npx tsc --noEmit            # typecheck
+
 npx expo-doctor             # diagnose dependency and config issues
 npx expo install --fix      # fix incompatible package versions
 ```
 
-Run lint and typecheck before declaring any task done.
+Run lint before declaring any task done.
 
 ## Navigation & Routing
 
@@ -61,4 +61,4 @@ Backend: Python FastAPI in `server/`, separate from the app.
 - Background cream (#FBF6E9), text dark grey (#2B2B2B), high contrast.
 - Tap targets at least 48 px. Never use colour alone: add an icon or text label.
 - One main action per screen, generous spacing, clear friendly messages.
-Write app code in plain JavaScript (.js/.jsx), not TypeScript.
+Write app code in plain JavaScript (.js/.jsx), not TypeScript.No type annotations.

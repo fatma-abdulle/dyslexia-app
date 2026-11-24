@@ -5,13 +5,14 @@ import { Screen, BodyText, ActionButton, InputBox, AudioControls } from '../comp
 import ReadableText from '../components/ReadableText';
 import SettingsPanel from '../components/SettingsPanel';
 import { useSettings } from '../context/SettingsContext';
+import { recordTextRead } from '../services/progress';
 
 export default function ReadScreen() {
   const [input, setInput] = useState(''); const [shown, setShown] = useState(''); const [line, setLine] = useState(0); const [open, setOpen] = useState(false); const { colors } = useSettings();
   const count = Math.ceil(shown.trim().split(/\s+/).filter(Boolean).length / 9);
   return <Screen title="Read"><ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: 30 }}>
     <InputBox value={input} onChangeText={setInput} placeholder="Paste or type text here" multiline />
-    <ActionButton label="Make it easy to read" onPress={() => { setShown(input); setLine(0); }} />
+    <ActionButton label="Make it easy to read" onPress={() => { setShown(input); setLine(0); if (input.trim()) recordTextRead().catch(() => {}); }} />
     {shown ? <View style={{ backgroundColor: colors.card, borderRadius: 16, padding: 12, marginTop: 14 }}><ReadableText text={shown} highlightedLine={line} /><View style={{ flexDirection: 'row', flexWrap: 'wrap' }}><ActionButton label="← Previous line" secondary onPress={() => setLine(Math.max(0, line - 1))} /><ActionButton label="Next line →" secondary onPress={() => setLine(Math.min(Math.max(0, count - 1), line + 1))} /></View><AudioControls text={shown} /></View> : null}
     <Pressable accessibilityRole="button" accessibilityLabel="Toggle display settings" onPress={() => setOpen(!open)} style={{ minHeight: 52, justifyContent: 'center', marginTop: 16 }}><BodyText>{open ? '▾' : '▸'} Display settings</BodyText></Pressable>
     {open ? <SettingsPanel /> : null}

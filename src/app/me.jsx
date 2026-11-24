@@ -4,6 +4,8 @@ import { ScrollView, View, Pressable, Share } from 'react-native';
 import { Screen, BodyText, ActionButton, ErrorMessage, Loading } from '../components/AppUI';
 import { getShareProgress } from '../services/progress';
 import { useSettings } from '../context/SettingsContext';
+import { useToast } from '../context/ToastContext';
+import { speakText } from '../services/speech';
 
 const parts = [
   ['streak', 'Days used in a row'], ['textsRead', 'Texts read'],
@@ -18,6 +20,7 @@ function scoreText(score) {
 
 export default function MeScreen() {
   const { colors } = useSettings();
+  const showToast = useToast();
   const [progress, setProgress] = useState(null);
   const [selected, setSelected] = useState(Object.fromEntries(parts.map(([key]) => [key, true])));
   const [error, setError] = useState('');
@@ -55,6 +58,7 @@ export default function MeScreen() {
     {rows.map(([key, value]) => <Pressable key={key} accessibilityRole="checkbox" accessibilityState={{ checked: selected[key] }} accessibilityLabel={`Include ${parts.find(([name]) => name === key)?.[1]}`} onPress={() => setSelected((old) => ({ ...old, [key]: !old[key] }))} style={{ minHeight: 52, flexDirection: 'row', alignItems: 'center', paddingVertical: 7 }}><View style={{ width: 28, height: 28, borderRadius: 6, borderWidth: 2, borderColor: colors.accent, backgroundColor: selected[key] ? colors.accent : 'transparent', alignItems: 'center', justifyContent: 'center', marginRight: 12 }}><BodyText style={{ color: colors.background, fontSize: 18 }}>{selected[key] ? '✓' : ''}</BodyText></View><View style={{ flex: 1 }}><BodyText>{parts.find(([name]) => name === key)?.[1]}</BodyText><BodyText style={{ fontSize: 18 }}>{value}</BodyText></View></Pressable>)}
     {progress ? <View style={{ padding: 14, marginTop: 12, backgroundColor: colors.card, borderRadius: 16 }}><BodyText style={{ fontSize: 22, marginBottom: 6 }}>Preview</BodyText><BodyText>{shareText() || 'Choose at least one item to make your progress summary.'}</BodyText></View> : null}
     <ActionButton label="↗ Share my progress" onPress={share} disabled={!progress || !Object.values(selected).some(Boolean)} />
+    <ActionButton label="Test sound" secondary onPress={() => speakText('Sound check, can you hear me?', { onError: () => showToast('Speech could not start. Check that a voice is installed.') })} />
     <BodyText style={{ textAlign: 'center', marginTop: 8 }}>You decide what to share and who sees it.</BodyText>
   </ScrollView></Screen>;
 }

@@ -1,8 +1,9 @@
 // Shared screen layout, accessible buttons, and speech controls.
-import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable, ActivityIndicator, Alert } from 'react-native';
-import * as Speech from 'expo-speech';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, TextInput, Pressable, ActivityIndicator, Alert, Platform } from 'react-native';
 import { useSettings } from '../context/SettingsContext';
+import { useToast } from '../context/ToastContext';
+import { NO_VOICE_MESSAGE, speakText, stopSpeech } from '../services/speech';
 
 export function Screen({ title, children }) {
   const { colors } = useSettings();
@@ -20,11 +21,40 @@ export function InputBox({ value, onChangeText, placeholder, multiline = false }
   const { colors } = useSettings();
   return <TextInput accessibilityLabel={placeholder} value={value} onChangeText={onChangeText} placeholder={placeholder} placeholderTextColor={colors.text + '99'} multiline={multiline} textAlignVertical={multiline ? 'top' : 'center'} style={{ minHeight: multiline ? 140 : 56, borderWidth: 1, borderColor: colors.accent, borderRadius: 14, padding: 14, backgroundColor: colors.card, color: colors.text, fontFamily: 'Lexend_400Regular', fontSize: 18, lineHeight: 29, marginBottom: 10 }} />;
 }
-export function AudioControls({ text }) {
+export function AudioControls({ text, onWordIndex, onNoStart }) {
   const [speed, setSpeed] = useState(1);
   const [reading, setReading] = useState(false);
-  const speak = () => { if (!text.trim()) return; setReading(true); Speech.speak(text, { rate: speed, onDone: () => setReading(false), onStopped: () => setReading(false), onError: () => setReading(false) }); };
-  return <View style={{ marginTop: 12 }}><BodyText>{reading ? 'Reading...' : 'Stopped'}</BodyText><View style={{ flexDirection: 'row', flexWrap: 'wrap' }}><ActionButton label="▶ Play" onPress={speak} /><ActionButton label="■ Stop" secondary onPress={() => { Speech.stop(); setReading(false); }} /><ActionButton label={`Speed: ${speed === 0.75 ? 'Slow' : 'Normal'}`} secondary onPress={() => setSpeed(speed === 1 ? 0.75 : 1)} /></View></View>;
+  const showToast = useToast();
+  const startTimer = useRef(null);
+  const wordTimer = useRef(null);
+  const boundarySeen = useRef(false);
+  const words = String(text || '').trim().split(/\s+/).filter(Boolean);
+  const clearTimers = () => { clearTimeout(startTimer.current); clearInterval(wordTimer.current); };
+  useEffect(() => () => { clearTimers(); }, []);
+  const speak = () => {
+    if (!words.length) return;
+    clearTimers(); boundarySeen.current = false;
+    setReading(true);
+    if (Platform.OS === 'android') startTimer.current = setTimeout(() => { showToast(NO_VOICE_MESSAGE); onNoStart?.(); }, 3000);
+    speakText(text, {
+      rate: speed,
+      onStart: () => {
+        clearTimeout(startTimer.current);
+        wordTimer.current = setInterval(() => {
+          if (!boundarySeen.current) onWordIndex?.((index) => Math.min(words.length - 1, index + 1));
+        }, Math.max(260, 600 / speed));
+      },
+      onBoundary: (event) => {
+        boundarySeen.current = true; clearInterval(wordTimer.current);
+        if (Number.isFinite(event?.charIndex)) onWordIndex?.(words.slice(0, text.slice(0, event.charIndex).trim().split(/\s+/).filter(Boolean).length).length);
+      },
+      onDone: () => { clearTimers(); setReading(false); },
+      onStopped: () => { clearTimers(); setReading(false); },
+      onError: () => { clearTimers(); setReading(false); showToast('Speech could not start. Check that a voice is installed.'); },
+    });
+  };
+  const stop = () => { clearTimers(); stopSpeech(); setReading(false); };
+  return <View style={{ marginTop: 12 }}><BodyText>{reading ? 'Reading...' : 'Stopped'}</BodyText><View style={{ flexDirection: 'row', flexWrap: 'wrap' }}><ActionButton label="Play" onPress={speak} /><ActionButton label="Stop" secondary onPress={stop} /><ActionButton label={`Speed: ${speed === 0.75 ? 'Slow' : 'Normal'}`} secondary onPress={() => setSpeed(speed === 0.75 ? 1 : 0.75)} /></View></View>;
 }
 export function ErrorMessage({ children }) { return <BodyText style={{ color: '#8B3F35', marginVertical: 8 }}>{children}</BodyText>; }
 export function Loading() { const { colors } = useSettings(); return <ActivityIndicator accessibilityLabel="Loading" size="large" color={colors.accent} style={{ margin: 16 }} />; }

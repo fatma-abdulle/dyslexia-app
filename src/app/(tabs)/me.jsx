@@ -1,11 +1,13 @@
 // Me tab: review local progress and choose what to share from a preview.
 import React, { useEffect, useMemo, useState } from 'react';
 import { ScrollView, View, Pressable, Share } from 'react-native';
-import { Screen, BodyText, ActionButton, ErrorMessage, Loading } from '../components/AppUI';
-import { getShareProgress } from '../services/progress';
-import { useSettings } from '../context/SettingsContext';
-import { useToast } from '../context/ToastContext';
-import { speakText } from '../services/speech';
+import { Screen, BodyText, ActionButton, ErrorMessage, Loading } from '../../components/AppUI';
+import { getShareProgress } from '../../services/progress';
+import { useSettings } from '../../context/SettingsContext';
+import { useToast } from '../../context/ToastContext';
+import { speakText } from '../../services/speech';
+import { useAuth } from '../../context/AuthContext';
+import { router } from 'expo-router';
 
 const parts = [
   ['streak', 'Days used in a row'], ['textsRead', 'Texts read'],
@@ -20,6 +22,7 @@ function scoreText(score) {
 
 export default function MeScreen() {
   const { colors } = useSettings();
+  const { user, mode, signOut } = useAuth();
   const showToast = useToast();
   const [progress, setProgress] = useState(null);
   const [selected, setSelected] = useState(Object.fromEntries(parts.map(([key]) => [key, true])));
@@ -50,6 +53,7 @@ export default function MeScreen() {
   };
 
   return <Screen title="Me"><ScrollView contentContainerStyle={{ paddingBottom: 30 }}>
+    <BodyText style={{ fontSize: 22, marginBottom: 12 }}>{user?.name || (mode === 'guest' ? 'You are using the app as a guest.' : '')}</BodyText>
     <BodyText style={{ marginBottom: 14 }}>Your progress stays on this device until you choose to share it.</BodyText>
     <BodyText style={{ fontSize: 24, marginBottom: 8 }}>Share my progress</BodyText>
     <BodyText style={{ marginBottom: 12 }}>Choose what you would like to include.</BodyText>
@@ -60,5 +64,6 @@ export default function MeScreen() {
     <ActionButton label="↗ Share my progress" onPress={share} disabled={!progress || !Object.values(selected).some(Boolean)} />
     <ActionButton label="Test sound" secondary onPress={() => speakText('Sound check, can you hear me?', { onError: () => showToast('Speech could not start. Check that a voice is installed.') })} />
     <BodyText style={{ textAlign: 'center', marginTop: 8 }}>You decide what to share and who sees it.</BodyText>
+    <ActionButton label="Sign out" secondary onPress={async () => { await signOut(); router.replace('/welcome'); }} />
   </ScrollView></Screen>;
 }

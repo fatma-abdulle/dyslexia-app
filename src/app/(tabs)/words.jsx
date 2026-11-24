@@ -2,9 +2,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Screen, BodyText, Loading } from '../components/AppUI';
-import WordExplainer from '../components/WordExplainer';
-import { useSettings } from '../context/SettingsContext';
+import { Screen, BodyText, Loading } from '../../components/AppUI';
+import WordExplainer from '../../components/WordExplainer';
+import { useSettings } from '../../context/SettingsContext';
 
 export default function WordsScreen() {
   const [words, setWords] = useState(null);

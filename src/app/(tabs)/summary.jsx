@@ -1,10 +1,10 @@
 // Summarise tab: turns notes into a few readable points and speaks them aloud.
 import React, { useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { Screen, BodyText, ActionButton, InputBox, ErrorMessage, Loading, AudioControls } from '../components/AppUI';
-import ReadableText from '../components/ReadableText';
-import { summarize } from '../services/api';
-import { useSettings } from '../context/SettingsContext';
+import { Screen, BodyText, ActionButton, InputBox, ErrorMessage, Loading, AudioControls } from '../../components/AppUI';
+import ReadableText from '../../components/ReadableText';
+import { summarize } from '../../services/api';
+import { useSettings } from '../../context/SettingsContext';
 
 export default function SummaryScreen() {
   const [input, setInput] = useState(''); const [bullets, setBullets] = useState([]); const [busy, setBusy] = useState(false); const [message, setMessage] = useState(''); const { colors } = useSettings();

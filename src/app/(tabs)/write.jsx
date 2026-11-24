@@ -2,11 +2,11 @@
 import React, { useEffect, useState } from 'react';
 import { ScrollView, View, Pressable, Text } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Screen, BodyText, ActionButton, InputBox, ErrorMessage, confirmReset } from '../components/AppUI';
-import { classify, suggest } from '../services/api';
-import { useSettings } from '../context/SettingsContext';
-import { speakText } from '../services/speech';
-import { useToast } from '../context/ToastContext';
+import { Screen, BodyText, ActionButton, InputBox, ErrorMessage, confirmReset } from '../../components/AppUI';
+import { classify, suggest } from '../../services/api';
+import { useSettings } from '../../context/SettingsContext';
+import { speakText } from '../../services/speech';
+import { useToast } from '../../context/ToastContext';
 
 const explanations = { reversal: ['You flipped a letter that looks like its mirror, like b and d.', '↔'], transposition: ['Two letters next to each other swapped places.', '⇄'], omission: ['A letter is missing.', '−'], phonetic: ['You spelled it how it sounds.', '♫'], other: ["This mistake doesn't fit a common pattern. Check the word again.", '•'] };
 const blankTally = { reversal: 0, transposition: 0, omission: 0, phonetic: 0, other: 0 };

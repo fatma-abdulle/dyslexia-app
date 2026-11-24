@@ -17,9 +17,9 @@ export function ActionButton({ label, onPress, secondary = false, disabled = fal
   const { colors } = useSettings();
   return <Pressable accessibilityRole="button" accessibilityLabel={label} disabled={disabled} onPress={onPress} style={{ minHeight: 52, justifyContent: 'center', alignItems: 'center', borderRadius: 14, paddingHorizontal: 16, marginVertical: 6, backgroundColor: secondary ? colors.soft : colors.accent, opacity: disabled ? 0.55 : 1 }}><Text style={{ fontSize: 18, color: secondary ? colors.text : colors.background, fontFamily: 'Lexend_600SemiBold' }}>{label}</Text></Pressable>;
 }
-export function InputBox({ value, onChangeText, placeholder, multiline = false }) {
+export function InputBox({ value, onChangeText, placeholder, multiline = false, secureTextEntry = false, keyboardType = 'default', autoCapitalize = 'sentences', autoComplete }) {
   const { colors } = useSettings();
-  return <TextInput accessibilityLabel={placeholder} value={value} onChangeText={onChangeText} placeholder={placeholder} placeholderTextColor={colors.text + '99'} multiline={multiline} textAlignVertical={multiline ? 'top' : 'center'} style={{ minHeight: multiline ? 140 : 56, borderWidth: 1, borderColor: colors.accent, borderRadius: 14, padding: 14, backgroundColor: colors.card, color: colors.text, fontFamily: 'Lexend_400Regular', fontSize: 18, lineHeight: 29, marginBottom: 10 }} />;
+  return <TextInput accessibilityLabel={placeholder} value={value} onChangeText={onChangeText} placeholder={placeholder} placeholderTextColor={colors.text + '99'} multiline={multiline} secureTextEntry={secureTextEntry} keyboardType={keyboardType} autoCapitalize={autoCapitalize} autoComplete={autoComplete} textAlignVertical={multiline ? 'top' : 'center'} style={{ minHeight: multiline ? 140 : 56, borderWidth: 1, borderColor: colors.accent, borderRadius: 14, padding: 14, backgroundColor: colors.card, color: colors.text, fontFamily: 'Lexend_400Regular', fontSize: 18, lineHeight: 29, marginBottom: 10 }} />;
 }
 export function AudioControls({ text, onWordIndex, onNoStart }) {
   const [speed, setSpeed] = useState(1);

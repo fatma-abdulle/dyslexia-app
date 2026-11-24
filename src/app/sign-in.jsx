@@ -4,6 +4,7 @@ import { ScrollView, Pressable } from 'react-native';
 import { router } from 'expo-router';
 import { Screen, BodyText, ActionButton, InputBox, ErrorMessage } from '../components/AppUI';
 import { useAuth } from '../context/AuthContext';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function SignInScreen() {
   const { signIn } = useAuth();
@@ -16,5 +17,5 @@ export default function SignInScreen() {
     try { await signIn(email, password); router.replace('/(tabs)'); }
     catch (issue) { setError(issue.message); } finally { setBusy(false); }
   };
-  return <Screen title="Sign in"><ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: 30 }}><InputBox value={email} onChangeText={setEmail} placeholder="Email address" keyboardType="email-address" autoCapitalize="none" autoComplete="email" /><InputBox value={password} onChangeText={setPassword} placeholder="Password" secureTextEntry={!showPassword} autoCapitalize="none" autoComplete="current-password" /><Pressable accessibilityRole="button" accessibilityLabel={showPassword ? 'Hide password' : 'Show password'} onPress={() => setShowPassword(!showPassword)} style={{ minHeight: 48, justifyContent: 'center' }}><BodyText>{showPassword ? 'Hide password' : 'Show password'}</BodyText></Pressable>{error ? <ErrorMessage>{error}</ErrorMessage> : null}<ActionButton label={busy ? 'Signing in...' : 'Sign in'} onPress={submit} disabled={busy} /><ActionButton label="Back to welcome" secondary onPress={() => router.replace('/welcome')} /></ScrollView></Screen>;
+  return <Screen title="Sign in"><ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: 30 }}><InputBox value={email} onChangeText={setEmail} placeholder="Email address" keyboardType="email-address" autoCapitalize="none" autoComplete="email" /><InputBox value={password} onChangeText={setPassword} placeholder="Password" secureTextEntry={!showPassword} autoCapitalize="none" autoComplete="current-password" /><Pressable accessibilityRole="button" accessibilityLabel={showPassword ? 'Hide password' : 'Show password'} onPress={() => setShowPassword(!showPassword)} style={{ minHeight: 48, flexDirection: 'row', alignItems: 'center' }}><Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={22} style={{ marginRight: 8 }} /><BodyText>{showPassword ? 'Hide password' : 'Show password'}</BodyText></Pressable>{error ? <ErrorMessage>{error}</ErrorMessage> : null}<ActionButton label={busy ? 'Signing in...' : 'Sign in'} icon="log-in-outline" onPress={submit} disabled={busy} /><ActionButton label="Back to welcome" icon="arrow-back-outline" secondary onPress={() => router.replace('/welcome')} /></ScrollView></Screen>;
 }

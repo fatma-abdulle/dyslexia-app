@@ -7,5 +7,5 @@ import { useAuth } from '../context/AuthContext';
 
 export default function WelcomeScreen() {
   const { continueAsGuest } = useAuth();
-  return <Screen title="Read Easy"><ScrollView contentContainerStyle={{ paddingBottom: 30 }}><BodyText style={{ marginBottom: 24 }}>Read, understand, and study at your own pace.</BodyText><ActionButton label="Create account" onPress={() => router.push('/sign-up')} /><ActionButton label="Sign in" secondary onPress={() => router.push('/sign-in')} /><ActionButton label="Continue as guest" secondary onPress={() => continueAsGuest()} /></ScrollView></Screen>;
+  return <Screen title="Read Easy"><ScrollView contentContainerStyle={{ paddingBottom: 30 }}><BodyText style={{ marginBottom: 24 }}>Read, understand, and study at your own pace.</BodyText><ActionButton label="Create account" icon="person-add-outline" onPress={() => router.push('/sign-up')} /><ActionButton label="Sign in" icon="log-in-outline" secondary onPress={() => router.push('/sign-in')} /><ActionButton label="Continue as guest" icon="person-outline" secondary onPress={() => continueAsGuest()} /></ScrollView></Screen>;
 }

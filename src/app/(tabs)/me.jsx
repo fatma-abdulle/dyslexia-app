@@ -8,6 +8,7 @@ import { useToast } from '../../context/ToastContext';
 import { speakText } from '../../services/speech';
 import { useAuth } from '../../context/AuthContext';
 import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 const parts = [
   ['streak', 'Days used in a row'], ['textsRead', 'Texts read'],
@@ -59,11 +60,11 @@ export default function MeScreen() {
     <BodyText style={{ marginBottom: 12 }}>Choose what you would like to include.</BodyText>
     {!progress && !error ? <Loading /> : null}
     {error ? <ErrorMessage>{error}</ErrorMessage> : null}
-    {rows.map(([key, value]) => <Pressable key={key} accessibilityRole="checkbox" accessibilityState={{ checked: selected[key] }} accessibilityLabel={`Include ${parts.find(([name]) => name === key)?.[1]}`} onPress={() => setSelected((old) => ({ ...old, [key]: !old[key] }))} style={{ minHeight: 52, flexDirection: 'row', alignItems: 'center', paddingVertical: 7 }}><View style={{ width: 28, height: 28, borderRadius: 6, borderWidth: 2, borderColor: colors.accent, backgroundColor: selected[key] ? colors.accent : 'transparent', alignItems: 'center', justifyContent: 'center', marginRight: 12 }}><BodyText style={{ color: colors.background, fontSize: 18 }}>{selected[key] ? '✓' : ''}</BodyText></View><View style={{ flex: 1 }}><BodyText>{parts.find(([name]) => name === key)?.[1]}</BodyText><BodyText style={{ fontSize: 18 }}>{value}</BodyText></View></Pressable>)}
+    {rows.map(([key, value]) => <Pressable key={key} accessibilityRole="checkbox" accessibilityState={{ checked: selected[key] }} accessibilityLabel={`Include ${parts.find(([name]) => name === key)?.[1]}`} onPress={() => setSelected((old) => ({ ...old, [key]: !old[key] }))} style={{ minHeight: 52, flexDirection: 'row', alignItems: 'center', paddingVertical: 7 }}><View style={{ width: 28, height: 28, borderRadius: 6, borderWidth: 2, borderColor: colors.accent, backgroundColor: selected[key] ? colors.accent : 'transparent', alignItems: 'center', justifyContent: 'center', marginRight: 12 }}>{selected[key] ? <Ionicons name="checkmark" size={20} color={colors.background} /> : null}</View><View style={{ flex: 1 }}><BodyText>{parts.find(([name]) => name === key)?.[1]}</BodyText><BodyText style={{ fontSize: 18 }}>{value}</BodyText></View></Pressable>)}
     {progress ? <View style={{ padding: 14, marginTop: 12, backgroundColor: colors.card, borderRadius: 16 }}><BodyText style={{ fontSize: 22, marginBottom: 6 }}>Preview</BodyText><BodyText>{shareText() || 'Choose at least one item to make your progress summary.'}</BodyText></View> : null}
-    <ActionButton label="↗ Share my progress" onPress={share} disabled={!progress || !Object.values(selected).some(Boolean)} />
-    <ActionButton label="Test sound" secondary onPress={() => speakText('Sound check, can you hear me?', { onError: () => showToast('Speech could not start. Check that a voice is installed.') })} />
+    <ActionButton label="Share my progress" icon="share-social-outline" onPress={share} disabled={!progress || !Object.values(selected).some(Boolean)} />
+    <ActionButton label="Test sound" icon="volume-high-outline" secondary onPress={() => speakText('Sound check, can you hear me?', { onError: () => showToast('Speech could not start. Check that a voice is installed.') })} />
     <BodyText style={{ textAlign: 'center', marginTop: 8 }}>You decide what to share and who sees it.</BodyText>
-    <ActionButton label="Sign out" secondary onPress={async () => { await signOut(); router.replace('/welcome'); }} />
+    <ActionButton label="Sign out" icon="log-out-outline" secondary onPress={async () => { await signOut(); router.replace('/welcome'); }} />
   </ScrollView></Screen>;
 }

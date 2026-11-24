@@ -8,6 +8,7 @@ import { useSettings } from '../../context/SettingsContext';
 import { recordTextRead } from '../../services/progress';
 import { getSpeechVoices, NO_VOICE_MESSAGE } from '../../services/speech';
 import { useToast } from '../../context/ToastContext';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function ReadScreen() {
   const [input, setInput] = useState(''); const [shown, setShown] = useState(''); const [line, setLine] = useState(0); const [word, setWord] = useState(-1); const [open, setOpen] = useState(false); const [voiceMessage, setVoiceMessage] = useState(''); const { colors } = useSettings(); const showToast = useToast();
@@ -18,7 +19,7 @@ export default function ReadScreen() {
     <ActionButton label="Make it easy to read" onPress={() => { setShown(input); setLine(0); if (input.trim()) recordTextRead().catch(() => {}); }} />
     {voiceMessage ? <BodyText style={{ marginBottom: 12 }}>{voiceMessage}</BodyText> : null}
     {shown ? <View style={{ backgroundColor: colors.card, borderRadius: 16, padding: 12, marginTop: 14 }}><ReadableText text={shown} highlightedLine={line} highlightedWordIndex={word} /><View style={{ flexDirection: 'row', flexWrap: 'wrap' }}><ActionButton label="Previous line" secondary onPress={() => setLine(Math.max(0, line - 1))} /><ActionButton label="Next line" secondary onPress={() => setLine(Math.min(Math.max(0, count - 1), line + 1))} /></View><AudioControls text={shown} onWordIndex={setWord} onNoStart={() => setVoiceMessage(NO_VOICE_MESSAGE)} /></View> : null}
-    <Pressable accessibilityRole="button" accessibilityLabel="Toggle display settings" onPress={() => setOpen(!open)} style={{ minHeight: 52, justifyContent: 'center', marginTop: 16 }}><BodyText>{open ? '▾' : '▸'} Display settings</BodyText></Pressable>
+    <Pressable accessibilityRole="button" accessibilityLabel="Toggle display settings" onPress={() => setOpen(!open)} style={{ minHeight: 52, flexDirection: 'row', alignItems: 'center', marginTop: 16 }}><Ionicons name={open ? 'chevron-down' : 'chevron-forward'} size={20} color={colors.text} style={{ marginRight: 8 }} /><BodyText>Display settings</BodyText></Pressable>
     {open ? <SettingsPanel /> : null}
   </ScrollView></Screen>;
 }

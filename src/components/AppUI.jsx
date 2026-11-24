@@ -4,6 +4,7 @@ import { View, Text, TextInput, Pressable, ActivityIndicator, Alert, Platform } 
 import { useSettings } from '../context/SettingsContext';
 import { useToast } from '../context/ToastContext';
 import { NO_VOICE_MESSAGE, speakText, stopSpeech } from '../services/speech';
+import { Ionicons } from '@expo/vector-icons';
 
 export function Screen({ title, children }) {
   const { colors } = useSettings();
@@ -13,9 +14,10 @@ export function BodyText({ children, style = {} }) {
   const { colors, settings } = useSettings();
   return <Text style={{ color: colors.text, fontFamily: 'Lexend_400Regular', fontSize: Math.max(18, settings.fontSize), lineHeight: settings.fontSize * settings.lineSpacing, letterSpacing: settings.letterSpacing, ...style }}>{children}</Text>;
 }
-export function ActionButton({ label, onPress, secondary = false, disabled = false }) {
+export function ActionButton({ label, onPress, secondary = false, disabled = false, icon }) {
   const { colors } = useSettings();
-  return <Pressable accessibilityRole="button" accessibilityLabel={label} disabled={disabled} onPress={onPress} style={{ minHeight: 52, justifyContent: 'center', alignItems: 'center', borderRadius: 14, paddingHorizontal: 16, marginVertical: 6, backgroundColor: secondary ? colors.soft : colors.accent, opacity: disabled ? 0.55 : 1 }}><Text style={{ fontSize: 18, color: secondary ? colors.text : colors.background, fontFamily: 'Lexend_600SemiBold' }}>{label}</Text></Pressable>;
+  const tint = secondary ? colors.text : colors.background;
+  return <Pressable accessibilityRole="button" accessibilityLabel={label} disabled={disabled} onPress={onPress} style={{ minHeight: 52, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', borderRadius: 14, paddingHorizontal: 16, marginVertical: 6, backgroundColor: secondary ? colors.soft : colors.accent, opacity: disabled ? 0.55 : 1 }}>{icon ? <Ionicons name={icon} size={22} color={tint} style={{ marginRight: 8 }} /> : null}<Text style={{ fontSize: 18, color: tint, fontFamily: 'Lexend_600SemiBold' }}>{label}</Text></Pressable>;
 }
 export function InputBox({ value, onChangeText, placeholder, multiline = false, secureTextEntry = false, keyboardType = 'default', autoCapitalize = 'sentences', autoComplete }) {
   const { colors } = useSettings();
@@ -54,7 +56,7 @@ export function AudioControls({ text, onWordIndex, onNoStart }) {
     });
   };
   const stop = () => { clearTimers(); stopSpeech(); setReading(false); };
-  return <View style={{ marginTop: 12 }}><BodyText>{reading ? 'Reading...' : 'Stopped'}</BodyText><View style={{ flexDirection: 'row', flexWrap: 'wrap' }}><ActionButton label="Play" onPress={speak} /><ActionButton label="Stop" secondary onPress={stop} /><ActionButton label={`Speed: ${speed === 0.75 ? 'Slow' : 'Normal'}`} secondary onPress={() => setSpeed(speed === 0.75 ? 1 : 0.75)} /></View></View>;
+  return <View style={{ marginTop: 12 }}><BodyText>{reading ? 'Reading...' : 'Stopped'}</BodyText><View style={{ flexDirection: 'row', flexWrap: 'wrap' }}><ActionButton label="Play" icon="play-circle-outline" onPress={speak} /><ActionButton label="Stop" icon="stop-circle-outline" secondary onPress={stop} /><ActionButton label={`Speed: ${speed === 0.75 ? 'Slow' : 'Normal'}`} icon="speedometer-outline" secondary onPress={() => setSpeed(speed === 0.75 ? 1 : 0.75)} /></View></View>;
 }
 export function ErrorMessage({ children }) { return <BodyText style={{ color: '#8B3F35', marginVertical: 8 }}>{children}</BodyText>; }
 export function Loading() { const { colors } = useSettings(); return <ActivityIndicator accessibilityLabel="Loading" size="large" color={colors.accent} style={{ margin: 16 }} />; }

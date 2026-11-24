@@ -13,9 +13,9 @@ export async function speakText(text, options = {}) {
   const rate = Number.isFinite(options.rate) ? Math.max(0.5, Math.min(2, options.rate)) : 1;
   const pitch = Number.isFinite(options.pitch) ? Math.max(0.5, Math.min(2, options.pitch)) : 1;
   try {
-    await setAudioModeAsync({ playsInSilentMode: true, interruptionMode: 'doNotMix' });
+    await setAudioModeAsync({ playsInSilentMode: true, interruptionMode: 'duckOthers' });
     Speech.speak(String(text), {
-      language: options.language || 'en-US', rate, pitch, volume: 1,
+      language: options.language || 'en-US', rate, pitch, volume: 1, useApplicationAudioSession: true,
       onStart: options.onStart,
       onDone: options.onDone,
       onStopped: options.onStopped,

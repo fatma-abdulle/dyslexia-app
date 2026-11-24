@@ -10,7 +10,7 @@ py -m venv .venv
 python -m pip install -r requirements.txt
 ```
 
-The training notebook and its scikit-learn version were not included with this project. Replace the placeholder functions in `features.py` with the exact `MIRROR`, `clean()`, and `extract_features()` notebook code. Copy the trained `dyslexia_rf.joblib` into this folder. Change the unpinned `scikit-learn` line in `requirements.txt` to the exact version used to train the model. Until then, `/classify` returns a clear setup error.
+The trained `dyslexia_rf.joblib` is stored in this folder. `features.py` uses the notebook's cleaning and feature functions. The model metadata identifies scikit-learn 1.6.1, pinned in `requirements.txt`. The API returns a friendly setup message if the model cannot be loaded.
 
 ## Find your PC's IPv4 address
 
@@ -44,7 +44,9 @@ Invoke-RestMethod http://127.0.0.1:8000/health
 Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/classify -ContentType 'application/json' -Body '{"intended":"bed","typed":"ded"}'
 ```
 
-The classify request returns a setup message until the notebook features and model have been added.
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/model-info
+```
 
 ```powershell
 Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/summarize -ContentType 'application/json' -Body '{"text":"Plants use sunlight to make food. Their roots take in water. Leaves exchange gases with the air. Stems carry water through the plant. Flowers help many plants reproduce."}'

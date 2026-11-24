@@ -4,13 +4,14 @@ const path = require('node:path');
 
 const emojiPattern = /(\p{Extended_Pictographic}|\p{Regional_Indicator}{2}|[0-9#*]\uFE0F?\u20E3)/gu;
 const roots = ['src', 'server'];
+const textExtensions = new Set(['.js', '.jsx', '.py', '.md', '.txt', '.json', '.yml', '.yaml']);
 const matches = [];
 
 function scan(folder) {
   for (const entry of fs.readdirSync(folder, { withFileTypes: true })) {
     const fullPath = path.join(folder, entry.name);
     if (entry.isDirectory()) scan(fullPath);
-    else {
+    else if (textExtensions.has(path.extname(entry.name).toLowerCase())) {
       const content = fs.readFileSync(fullPath, 'utf8');
       for (const match of content.matchAll(emojiPattern)) matches.push(`${fullPath}: ${match[0]}`);
     }

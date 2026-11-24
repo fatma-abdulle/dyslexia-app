@@ -28,7 +28,22 @@ export async function classify(intended, typed) {
     else { const different = [...a].map((letter, i) => letter !== b[i] ? i : -1).filter((i) => i >= 0); if (different.length === 2 && a[different[0]] === b[different[1]] && a[different[1]] === b[different[0]]) label = 'transposition'; }
   } else if (a.length - b.length === 1 && [...a].some((_, i) => a.slice(0, i) + a.slice(i + 1) === b)) label = 'omission';
   else if (a.replace(/(.)\1/g, '$1') === b.replace(/(.)\1/g, '$1')) label = 'phonetic';
-  return { label, confidence: 0.9 };
+  const labels = ['reversal', 'transposition', 'omission', 'phonetic', 'other'];
+  const probabilities = Object.fromEntries(labels.map((item) => [item, item === label ? 0.9 : 0.025]));
+  const features = {
+    len_diff: b.length - a.length,
+    same_letters: Number([...a].sort().join('') === [...b].sort().join('')),
+    n_replace: 0, n_delete: Math.max(0, a.length - b.length), n_insert: Math.max(0, b.length - a.length),
+    mirror_swaps: label === 'reversal' ? 1 : 0,
+    mismatches: [...a].filter((letter, index) => letter !== b[index]).length,
+    sound_match: Number(label === 'phonetic'), similarity: 0, first_letter_same: Number(a[0] === b[0]),
+  };
+  features.similarity = Math.round((1 - Math.abs(a.length - b.length) / Math.max(a.length, b.length)) * 100) / 100;
+  return {
+    ok: true, intended: a, typed: b, label, confidence: 0.9, probabilities, clues: features,
+    reasons: [label === 'omission' ? 'The typed word is shorter than the word you meant.' : 'The words have a spelling pattern the demo recognises.'],
+    top_clues_overall: ['similarity', 'len_diff', 'sound_match'], warnings: [],
+  };
 }
 export async function summarize(text) {
   if (!USE_MOCK) return (await post('/summarize', { text })).bullets;

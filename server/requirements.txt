@@ -3,5 +3,4 @@ uvicorn
 pandas
 jellyfish
 joblib
-# Replace with the exact scikit-learn version printed by the training notebook.
-scikit-learn
+scikit-learn==1.6.1

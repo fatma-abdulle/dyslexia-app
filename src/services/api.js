@@ -34,3 +34,27 @@ export async function summarize(text) {
   if (!USE_MOCK) return (await post('/summarize', { text })).bullets;
   return text.match(/[^.!?]+[.!?]+|[^.!?]+$/g)?.map((sentence) => sentence.trim()).filter(Boolean).slice(0, 3) || [];
 }
+
+export async function generatePractice(text, count, difficulty, types, ageBand = 'general') {
+  if (!USE_MOCK) return post('/study', { text, count, difficulty, types, ageBand });
+  const sentences = text.match(/[^.!?]+[.!?]+|[^.!?]+$/g)?.map((sentence) => sentence.trim()).filter(Boolean) || [];
+  if (!sentences.length || !types.length) throw new Error('Add some notes and choose at least one question type.');
+  const flashcards = Array.from({ length: count }, (_, index) => ({ front: 'What does the text say?', back: sentences[index % sentences.length] }));
+  const questions = Array.from({ length: count }, (_, index) => {
+    const type = types[index % types.length];
+    const fact = sentences[index % sentences.length];
+    if (type === 'multiple_choice') {
+      const answer_index = index % 4;
+      const options = [...new Set(sentences.filter((sentence) => sentence !== fact))].slice(0, 3);
+      ['The text does not mention this detail.', 'This detail is not stated in the text.', 'The text gives no information about this.'].forEach((option) => { if (options.length < 3 && !options.includes(option)) options.push(option); });
+      options.splice(answer_index, 0, fact);
+      return { type, question: 'Which statement matches the text?', options: options.slice(0, 4), answer_index, answer: fact, explanation: `The text states: ${fact}` };
+    }
+    if (type === 'true_false') {
+      const isTrue = index % 2 === 0;
+      return { type, question: isTrue ? `The text says: ${fact}` : `The text says this did not happen: ${fact}`, options: ['True', 'False', 'Not stated', 'I am not sure'], answer_index: isTrue ? 0 : 1, answer: isTrue ? 'True' : 'False', explanation: `The text states: ${fact}` };
+    }
+    return { type, question: 'What fact does the text give?', options: [], answer_index: null, answer: fact, explanation: 'This answer repeats a fact from the text.' };
+  });
+  return { flashcards, questions, difficulty };
+}

@@ -49,3 +49,10 @@ The classify request returns a setup message until the notebook features and mod
 ```powershell
 Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/summarize -ContentType 'application/json' -Body '{"text":"Plants use sunlight to make food. Their roots take in water. Leaves exchange gases with the air. Stems carry water through the plant. Flowers help many plants reproduce."}'
 ```
+
+Study practice uses only sentences from the supplied text. The service validates the request and response with Pydantic:
+
+```powershell
+$practice = @{ text = "Plants use sunlight to make food. Their roots take in water. Leaves exchange gases with the air. Stems carry water through the plant. Flowers help many plants reproduce."; count = 5; difficulty = "Easy"; types = @("multiple_choice", "true_false", "short_answer"); ageBand = "general" } | ConvertTo-Json
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/study -ContentType 'application/json' -Body $practice
+```

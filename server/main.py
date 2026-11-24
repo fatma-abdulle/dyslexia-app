@@ -2,12 +2,13 @@
 from collections import Counter
 from pathlib import Path
 import re
+from typing import List, Literal, Optional
 
 import joblib
 import pandas as pd
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 try:
     from features import clean, extract_features
@@ -27,6 +28,68 @@ class ClassifyRequest(BaseModel):
 
 class SummaryRequest(BaseModel):
     text: str
+
+
+class StudyPracticeRequest(BaseModel):
+    text: str = Field(min_length=1, max_length=12000)
+    count: Literal[5, 10, 15] = 5
+    difficulty: Literal["Easy", "Medium", "Hard"] = "Medium"
+    types: List[Literal["multiple_choice", "true_false", "short_answer"]] = Field(min_length=1)
+    ageBand: str = Field(default="general", max_length=40)
+
+
+class PracticeFlashcard(BaseModel):
+    front: str
+    back: str
+
+
+class PracticeQuestion(BaseModel):
+    type: Literal["multiple_choice", "true_false", "short_answer"]
+    question: str
+    options: List[str] = Field(default_factory=list)
+    answer_index: Optional[int] = None
+    answer: str
+    explanation: str
+
+
+class StudyPracticeResponse(BaseModel):
+    flashcards: List[PracticeFlashcard]
+    questions: List[PracticeQuestion]
+    difficulty: Literal["Easy", "Medium", "Hard"]
+
+
+def make_multiple_choice(sentences, fact, answer_index):
+    choices = [item for item in sentences if item != fact][:3]
+    fillers = ["The text does not mention this detail.", "This detail is not stated in the text.", "The text gives no information about this."]
+    for filler in fillers:
+        if len(choices) == 3:
+            break
+        if filler not in choices:
+            choices.append(filler)
+    choices.insert(answer_index, fact)
+    return choices[:4]
+
+
+def build_study_practice(request):
+    sentences = [part.strip() for part in re.split(r"(?<=[.!?])\s+|[\r\n]+", request.text.strip()) if part.strip()]
+    if not sentences:
+        raise HTTPException(status_code=422, detail="Add a few notes before making practice questions.")
+    flashcards = [PracticeFlashcard(front="What does the text say?", back=sentences[index % len(sentences)]) for index in range(request.count)]
+    questions = []
+    for index in range(request.count):
+        kind = request.types[index % len(request.types)]
+        fact = sentences[index % len(sentences)]
+        if kind == "multiple_choice":
+            answer_index = index % 4
+            questions.append(PracticeQuestion(type=kind, question="Which statement matches the text?", options=make_multiple_choice(sentences, fact, answer_index), answer_index=answer_index, answer=fact, explanation=f"The text states: {fact}"))
+        elif kind == "true_false":
+            is_true = index % 2 == 0
+            statement = f"The text says: {fact}" if is_true else f"The text says this did not happen: {fact}"
+            answer = "True" if is_true else "False"
+            questions.append(PracticeQuestion(type=kind, question=statement, options=["True", "False", "Not stated", "I am not sure"], answer_index=0 if is_true else 1, answer=answer, explanation=f"The text states: {fact}"))
+        else:
+            questions.append(PracticeQuestion(type=kind, question="What fact does the text give?", answer_index=None, answer=fact, explanation="This answer repeats a fact from the text."))
+    return StudyPracticeResponse(flashcards=flashcards, questions=questions, difficulty=request.difficulty)
 
 
 @app.get("/health")
@@ -74,3 +137,8 @@ def summarize(request: SummaryRequest):
     amount = min(5, max(3, len(sentences)))
     selected = sorted(scored, key=lambda item: item[0], reverse=True)[:amount]
     return {"bullets": [sentence for _, _, sentence in sorted(selected, key=lambda item: item[1])]}
+
+
+@app.post("/study", response_model=StudyPracticeResponse)
+def study(request: StudyPracticeRequest):
+    return build_study_practice(request)

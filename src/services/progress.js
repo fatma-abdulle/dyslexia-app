@@ -19,6 +19,13 @@ export async function recordTextRead() {
   await AsyncStorage.setItem(TEXTS_KEY, String(count + 1));
 }
 
+export async function saveQuizScore(score, total) {
+  const saved = await AsyncStorage.getItem('quiz-scores');
+  const scores = saved ? JSON.parse(saved) : [];
+  scores.push({ date: new Date().toISOString(), score, total, numberOfQuestions: total });
+  await AsyncStorage.setItem('quiz-scores', JSON.stringify(scores.slice(-50)));
+}
+
 function currentStreak(days) {
   const dates = new Set(days);
   const cursor = new Date();

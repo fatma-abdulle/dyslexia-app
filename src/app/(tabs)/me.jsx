@@ -1,5 +1,5 @@
 // Me tab: review local progress and choose what to share from a preview.
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { ScrollView, View, Pressable, Share } from 'react-native';
 import { Screen, BodyText, ActionButton, ErrorMessage, Loading } from '../../components/AppUI';
 import { getShareProgress } from '../../services/progress';
@@ -7,7 +7,7 @@ import { useSettings } from '../../context/SettingsContext';
 import { useToast } from '../../context/ToastContext';
 import { speakText } from '../../services/speech';
 import { useAuth } from '../../context/AuthContext';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
 const parts = [
@@ -18,7 +18,8 @@ const parts = [
 
 function scoreText(score) {
   if (typeof score === 'number' || typeof score === 'string') return `${score}%`;
-  return `${score.score ?? score.correct ?? 0}${score.total ? ` of ${score.total}` : '%'}`;
+  const result = `${score.score ?? score.correct ?? 0}${score.total ? ` of ${score.total}` : '%'}`;
+  return score.date ? `${result} (${new Date(score.date).toLocaleDateString()})` : result;
 }
 
 export default function MeScreen() {
@@ -28,7 +29,11 @@ export default function MeScreen() {
   const [progress, setProgress] = useState(null);
   const [selected, setSelected] = useState(Object.fromEntries(parts.map(([key]) => [key, true])));
   const [error, setError] = useState('');
-  useEffect(() => { getShareProgress().then(setProgress).catch(() => setError('I could not read your saved progress on this device.')); }, []);
+  useFocusEffect(useCallback(() => {
+    let active = true;
+    getShareProgress().then((next) => { if (active) setProgress(next); }).catch(() => { if (active) setError('I could not read your saved progress on this device.'); });
+    return () => { active = false; };
+  }, []));
 
   const rows = useMemo(() => {
     if (!progress) return [];
